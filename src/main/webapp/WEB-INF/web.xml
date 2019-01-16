@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_9" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+       
+    <context-param>
+    	<!-- 在指定的路径下去加载applicationContext.xml -->
+    	<param-name>contextConfigLocation</param-name>
+    	<param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+    <listener>
+    	<!-- 配置监听器，去加载我们的applicationContext.xml文件 -->
+    	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    
+    <filter>
+    	<!-- openEntityManagerInViewFilter 必须放到核心控制器上面,  把EntityManager的生命周期延长 -->
+    	<filter-name>openEntityManagerInViewFilter</filter-name>
+    	<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+    </filter>
+    <filter-mapping>
+    	<filter-name>openEntityManagerInViewFilter</filter-name>
+    	<url-pattern>*.action</url-pattern> 
+    </filter-mapping>
+   
+         
+         
+ <!-- 配置框架入手顺序： web.xml===db.properties===applciationContext.xml===struts.xml -->
+ 	<!-- 配置struts2的核心控制器 -->
+ 	<filter>
+ 		<filter-name>strutsPrepareAndExecuteFilter</filter-name>
+ 		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+ 	</filter>
+ 	<filter-mapping>
+ 		<filter-name>strutsPrepareAndExecuteFilter</filter-name>
+ 		<url-pattern>/*</url-pattern>
+ 	</filter-mapping>
+</web-app>

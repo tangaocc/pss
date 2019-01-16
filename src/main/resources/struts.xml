@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- 开发者模式，你修改了当前的配置，不需要重新启动 -->
+    <constant name="struts.devMode" value="true" />
+    <!-- 使用自定义的样式 -->
+    <constant name="struts.ui.theme" value="simple"/>
+    <!-- 修改访问的后缀 -->
+    <constant name="struts.action.extension" value="action"/>
+    <!-- 使用国际化 -->
+    <constant name="struts.custom.i18n.resources" value="app"/>
+ 	 <!--   告诉struts我当前的环境就是中文环境 -->
+    <constant name="struts.locale" value="zh_CN"/>
+    
+    <!-- struts-default :该包是不支持自动转为json -->
+    <package name="default" namespace="/" extends="json-default">
+    	
+    	<interceptors>
+    		<!-- 自定义权限拦截器 -->
+    		<interceptor name="permissionInterceptor" class="cn.itsource.pss.web.interceptor.PermissionInterceptor">
+    			<!-- 排除直接放行的action -->
+    			<param name="excludeActions">LoginAction</param>
+    		</interceptor>
+    		<!-- 自定义的拦截器栈 -->
+    		<interceptor-stack name="myStack">
+    			<interceptor-ref name="permissionInterceptor"/>
+    			<interceptor-ref name="paramsPrepareParamsStack"/>
+    		</interceptor-stack>
+    	
+    	</interceptors>
+    	
+    	<!-- 修改默认拦截器栈 -->
+    	<default-interceptor-ref name="myStack"/>
+    	
+    	<global-results>
+    		<!-- 定义全局视图 -->
+    		<result name="login">/WEB-INF/views/login.jsp</result>
+    		<result name="noAuth">/WEB-INF/views/noAuth.jsp</result>
+    		
+    		<!-- type="stream" struts2给我们提供的一种类型，它把下载功能已经写好了的，我们只需要按照它的规则去编写，就能正常的下载 -->
+    		<result name="download" type="stream">
+    			<!-- 你下载附件的mime类型    在tomcat  web.xml里面它包含所有的 mime类型-->
+                <param name="contentType">application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</param>
+                <param name="inputName">inputStream</param>
+                <!-- 附件输出的名字 -->
+                <param name="contentDisposition">filename=${fileName}</param>
+                <!-- 每次向外输出是以4kb进行输出 -->
+                <param name="bufferSize">4096</param>
+            </result>
+            <result name="jsonResult" type="json">
+            	<!-- 哪个map栈中的数据需要转为json格式 -->
+            	<param name="root">#map</param>
+            	<!-- 排除为空的 属性 -->
+            	<param name="excludeNullProperties">true</param>
+            </result>
+    	</global-results>
+    	
+    	
+    	
+    	<action name="login_*" class="loginAction" method="{1}">
+    		<result type="redirectAction">main</result>
+    	</action>
+    	
+        <action name="main_*" class="mainAction" method="{1}">
+        	<result>/WEB-INF/views/main.jsp</result>
+        	<result name="right">/WEB-INF/views/main_right.jsp</result>
+        </action>
+        
+        <action name="import_*" class="importAction" method="{1}">
+        	<result>/WEB-INF/views/import.jsp</result>
+        </action>
+        
+        
+        
+         <action name="employee_*" class="employeeAction" method="{1}">
+         		<result>/WEB-INF/views/employee/employee.jsp</result>
+	        	<result name="input">/WEB-INF/views/employee/employee_input.jsp</result>
+	        	<result name="reload" type="redirectAction">
+	        		<param name="namespace">/</param>
+	        		<param name="actionName">employee</param>
+	        		<!-- 类似与el表达式，它其实会在值栈里面获取对应的值 -->
+	        		<param name="baseQuery.currentPage">${baseQuery.currentPage}</param>
+	        		<param name="baseQuery.pageSize">${baseQuery.pageSize}</param>
+	        		<!-- ${id} 此id拿到的是employee对象中的id，因为它把employee对象压入到栈顶了 -->
+	        		<param name="id">${id}</param>
+	        		<param name="baseQuery.username">${baseQuery.username}</param>
+	        		<param name="baseQuery.password">${baseQuery.password}</param>
+	        		<param name="baseQuery.departmentId">${baseQuery.departmentId}</param>
+	        	</result>
+         </action>
+      
+        <!-- 公共的crud   action配置 -->
+         <action name="*_*" class="{1}Action" method="{2}">
+	         	<result>/WEB-INF/views/{1}/{1}.jsp</result>
+	        	<result name="input">/WEB-INF/views/{1}/{1}_input.jsp</result>
+	        	<result name="reload" type="redirectAction">
+	        		<param name="namespace">/</param>
+	        		<param name="actionName">{1}</param>
+	        		<!-- 类似与el表达式，它其实会在值栈里面获取对应的值 -->
+	        		<param name="baseQuery.currentPage">${baseQuery.currentPage}</param>
+	        		<param name="baseQuery.pageSize">${baseQuery.pageSize}</param>
+	        		<!-- ${id} 此id拿到的是employee对象中的id，因为它把employee对象压入到栈顶了 -->
+	        		<param name="id">${id}</param>
+	        		<param name="baseQuery.name">${baseQuery.name}</param>
+	        	</result>
+	        	<result name="{2}">/WEB-INF/views/{1}/{1}_{2}.jsp</result>
+         </action>
+         
+    </package>
+</struts>
